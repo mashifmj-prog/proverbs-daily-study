@@ -1,24 +1,19 @@
-const CACHE_NAME = 'proverbs-cache-v3';
+const CACHE_NAME = 'proverbs-cache-v4';
 const FILES_TO_CACHE = [
   '/',
   '/index.html',
   '/style.css',
   '/script.js',
-  '/manifest.json',
+  '/app-manifest.json',
   '/icon-192.png',
   '/icon-512.png',
-  // Pre-cache bundled translations (add as you create them—ensures offline from install)
-  '/web-proverbs.json',
-  '/kjv-proverbs.json',
-  '/asv-proverbs.json',
-  '/bbe-proverbs.json',
-  '/ceb-proverbs.json',
-  '/ylt-proverbs.json'
+  '/web-proverbs.json'
 ];
 
 self.addEventListener('install', event => {
   event.waitUntil(
     caches.open(CACHE_NAME).then(cache => cache.addAll(FILES_TO_CACHE))
+      .catch(err => console.error('Cache add failed:', err))
   );
   self.skipWaiting();
 });
@@ -33,17 +28,19 @@ self.addEventListener('activate', event => {
 });
 
 self.addEventListener('fetch', event => {
-  // For all requests: Cache-first, then network
   event.respondWith(
     caches.match(event.request)
-      .then(cachedResponse => cachedResponse || fetch(event.request).then(networkResponse => {
-        // Cache successful network responses for next time
-        if (networkResponse && networkResponse.status === 200) {
-          const responseClone = networkResponse.clone();
-          caches.open(CACHE_NAME).then(cache => cache.put(event.request, responseClone));
-        }
-        return networkResponse;
-      }))
-      .catch(() => new Response('Offline: App cached, but resource unavailable.', { status: 503 }))
+      .then(cachedResponse => {
+        if (cachedResponse) return cachedResponse;
+        return fetch(event.request).then(networkResponse => {
+          if (networkResponse && networkResponse.status === 200) {
+            const responseClone = networkResponse.clone();
+            caches.open(CACHE_NAME).then(cache => cache.put(event.request, responseClone));
+          }
+          return networkResponse;
+        }).catch(() => {
+          return new Response('Offline: Please connect to the internet to load resources.', { status: 503 });
+        });
+      })
   );
 });
