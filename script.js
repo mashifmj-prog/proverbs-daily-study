@@ -1,13 +1,13 @@
-// Proverbs Daily Study — script.js
+// Proverbs Daily Study — script.js (Offline-First Edition)
 
 const dateElem = document.getElementById('liveDate');
 const clockElem = document.getElementById('liveClock');
 const chapterText = document.getElementById('chapterText');
 const footerNote = document.getElementById('footerNote');
 const translationSelect = document.getElementById('translationSelect');
-let chapters = {}; // { '5_web': ['1: verse1', ...] }
-let explanations = {}; // Cache: { '5_web_verse1': 'explanation text' }
-let reflections = {}; // Cache: { '5_web': 'reflection text' }
+let chapters = {}; // { '5_web': [{text: '...', reference: '5:1'}, ...] }
+let explanations = {}; // Cache: { 'verse_5:1_web': 'explanation text' }
+let reflections = {}; // Cache: { 'reflection_5_web': 'reflection text' }
 let currentVerse = "";
 let currentChapter = null;
 let currentTranslation = 'web';
@@ -28,9 +28,12 @@ const DEEPSEEK_MODEL = 'deepseek/deepseek-r1:free'; // Free tier model
 
 // Call DeepSeek API (no key needed for free tier)
 async function callDeepSeek(prompt, cacheKey) {
-  // Check cache first
-  if (explanations[cacheKey] || reflections[cacheKey]) {
-    return explanations[cacheKey] || reflections[cacheKey];
+  // Check cache first (load from localStorage if needed)
+  const storedExplanations = JSON.parse(localStorage.getItem('explanations') || '{}');
+  const storedReflections = JSON.parse(localStorage.getItem('reflections') || '{}');
+  if ((explanations[cacheKey] || storedExplanations[cacheKey]) || (reflections[cacheKey] || storedReflections[cacheKey])) {
+    const output = explanations[cacheKey] || storedExplanations[cacheKey] || reflections[cacheKey] || storedReflections[cacheKey];
+    return output;
   }
   try {
     const response = await fetch(DEEPSEEK_API_URL, {
@@ -55,8 +58,10 @@ async function callDeepSeek(prompt, cacheKey) {
     const output = data.choices[0].message.content.trim();
     if (cacheKey.startsWith('verse_')) {
       explanations[cacheKey] = output;
+      localStorage.setItem('explanations', JSON.stringify({ ...storedExplanations, [cacheKey]: output }));
     } else {
       reflections[cacheKey] = output;
+      localStorage.setItem('reflections', JSON.stringify({ ...storedReflections, [cacheKey]: output }));
     }
     return output;
   } catch (err) {
@@ -84,31 +89,42 @@ function getEffectiveDate() {
 function getChapterForDate(d) {
   const lastDay = new Date(d.getFullYear(), d.getMonth() + 1, 0).getDate();
   const day = d.getDate();
-  return Math.min(day, lastDay);
+  return Math.min(day, lastDay, 31); // Cap at 31 for Proverbs
 }
 
-// Fetch chapter (no caching)
+// Load chapter from bundled JSON (with localStorage cache)
 async function loadChapter(ch, trans = currentTranslation) {
-  const baseURL = `https://bible-api.com/proverbs ${ch}?translation=${trans}`;
+  const jsonFile = `./${trans}-proverbs.json`;
+  const cacheKey = `chapters_${trans}`;
   chapterText.innerHTML = '<p class="loading">Loading chapter…</p>';
+
+  // Try localStorage cache first (offline fallback)
+  const cachedChapters = JSON.parse(localStorage.getItem(cacheKey) || '{}');
+  if (cachedChapters[ch]) {
+    chapters[`${ch}_${trans}`] = cachedChapters[ch];
+    renderChapter(ch, trans);
+    return;
+  }
+
   try {
-    const res = await fetch(baseURL);
-    if (!res.ok) throw new Error('Fetch failed');
+    const res = await fetch(jsonFile);
+    if (!res.ok) throw new Error('Local file not found—ensure JSON is in repo.');
     const data = await res.json();
-    processChapter(data, ch, trans);
+    const chapterData = data.chapters[ch.toString()];
+    if (!chapterData) throw new Error('Chapter not in JSON.');
+    
+    chapters[`${ch}_${trans}`] = chapterData.verses;
+    // Cache full translation if not already
+    if (!localStorage.getItem(cacheKey)) {
+      localStorage.setItem(cacheKey, JSON.stringify(data.chapters));
+    }
+    renderChapter(ch, trans);
   } catch (err) {
-    console.error('Failed to fetch chapter:', err);
-    chapterText.innerHTML = '<p>Error loading chapter. Please check your internet connection and try again.</p>';
+    console.error('Failed to load chapter:', err);
+    chapterText.innerHTML = '<p>Error loading chapter. Using cache or check files. Offline? Preload once online.</p>';
   }
 }
 
-function processChapter(data, ch, trans) {
-  const verses = data.verses.map(v => `${v.verse}: ${v.text}`);
-  chapters[`${ch}_${trans}`] = verses;
-  renderChapter(ch, trans);
-}
-
-// Render a chapter
 function renderChapter(ch, trans) {
   currentChapter = ch;
   currentTranslation = trans;
@@ -123,15 +139,17 @@ function renderChapter(ch, trans) {
     chapterText.innerHTML = '<p class="loading">Loading chapter…</p>';
     return;
   }
-  chData.forEach(v => {
+  chData.forEach(verse => {
     const p = document.createElement('p');
-    p.textContent = v;
+    p.className = 'verse';
+    p.innerHTML = `<sup>${verse.reference.split(':')[1]}</sup> ${verse.text}`;
     chapterText.appendChild(p);
   });
   // Check for cached reflection
   const refKey = `reflection_${key}`;
-  if (reflections[refKey]) {
-    document.getElementById('reflectionText').textContent = reflections[refKey];
+  const storedReflections = JSON.parse(localStorage.getItem('reflections') || '{}');
+  if (reflections[refKey] || storedReflections[refKey]) {
+    document.getElementById('reflectionText').innerHTML = (reflections[refKey] || storedReflections[refKey]).split('\n').map(line => `<p>${line}</p>`).join('');
     document.getElementById('toggleReflection').textContent = 'Hide';
   }
 }
@@ -166,21 +184,22 @@ for (let i = 1; i <= 31; i++) {
 // Event listeners
 document.getElementById('randomVerseBtn').addEventListener('click', () => {
   if (!currentChapter || !currentTranslation) return;
-  const verse = pickRandomVerse(currentChapter, currentTranslation);
-  if (!verse) return;
-  currentVerse = verse;
+  const verseObj = pickRandomVerse(currentChapter, currentTranslation);
+  if (!verseObj) return;
+  currentVerse = `${verseObj.reference}: ${verseObj.text}`;
   document.getElementById('randomVerseArea').classList.remove('hidden');
-  document.getElementById('randomVerseText').textContent = verse;
+  document.getElementById('randomVerseText').innerHTML = `<sup>${verseObj.reference.split(':')[1]}</sup> ${verseObj.text}`;
   document.getElementById('verseExplanationArea').classList.add('hidden'); // Reset
   // Highlight in chapter
-  document.querySelectorAll('#chapterText p').forEach(p => {
-    p.classList.toggle('highlight', p.textContent === verse);
+  document.querySelectorAll('#chapterText .verse').forEach(p => {
+    p.classList.toggle('highlight', p.innerHTML.includes(verseObj.text));
   });
 });
 
 document.getElementById('closeRandom').addEventListener('click', () => {
   document.getElementById('randomVerseArea').classList.add('hidden');
-  document.querySelectorAll('#chapterText p').forEach(p => p.classList.remove('highlight'));
+  document.querySelectorAll('#chapterText .verse').forEach(p => p.classList.remove('highlight'));
+  document.getElementById('verseExplanationArea').classList.add('hidden');
 });
 
 document.getElementById('explainVerseBtn').addEventListener('click', async () => {
@@ -210,7 +229,10 @@ document.getElementById('copyChapterBtn').addEventListener('click', () => {
   if (!currentChapter || !currentTranslation) return;
   const key = `${currentChapter}_${currentTranslation}`;
   const data = chapters[key];
-  if (data) copyToClipboard(data.join('\n'));
+  if (data) {
+    const fullText = data.map(v => `${v.reference}: ${v.text}`).join('\n');
+    copyToClipboard(fullText);
+  }
 });
 
 document.getElementById('chapterReflectionBtn').addEventListener('click', async () => {
@@ -224,7 +246,8 @@ document.getElementById('chapterReflectionBtn').addEventListener('click', async 
   refText.textContent = 'Generating reflection...';
   toggleBtn.textContent = 'Hide';
   try {
-    const prompt = `Provide a concise 4-6 sentence reflection on Proverbs chapter ${currentChapter}, highlighting key themes, practical wisdom, and one modern takeaway. Keep it inspirational and educational.`;
+    const chapterVerses = chapters[key].map(v => `${v.reference}: ${v.text}`).join(' ');
+    const prompt = `Provide a concise 4-6 sentence reflection on Proverbs chapter ${currentChapter}, highlighting key themes, practical wisdom, and one modern takeaway. Keep it inspirational and educational. Chapter text: ${chapterVerses.substring(0, 1500)}...`;
     const reflection = await callDeepSeek(prompt, key);
     refText.classList.remove('loading');
     refText.innerHTML = reflection.split('\n').map(line => `<p>${line}</p>`).join('');
@@ -262,7 +285,7 @@ document.getElementById('todayBtn').addEventListener('click', () => {
 });
 
 document.getElementById('chapterSelect').addEventListener('change', () => {
-  const ch = parseInt(select.value);
+  const ch = parseInt(document.getElementById('chapterSelect').value);
   if (ch) loadChapter(ch, currentTranslation);
 });
 
@@ -322,10 +345,11 @@ async function init() {
 }
 init();
 
-// Service Worker registration commented out to disable caching
-// if ('serviceWorker' in navigator) {
-//   window.addEventListener('load', () => {
- //    navigator.serviceWorker.register('service-worker.js')
- //      .catch(err => console.error('SW registration failed:', err));
- //  });
- //}
+// Service Worker registration
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('./service-worker.js')
+      .then(reg => console.log('SW registered:', reg))
+      .catch(err => console.error('SW registration failed:', err));
+  });
+}
