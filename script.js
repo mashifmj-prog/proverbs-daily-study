@@ -216,4 +216,116 @@ document.getElementById('copyChapterBtn').addEventListener('click', () => {
 document.getElementById('chapterReflectionBtn').addEventListener('click', async () => {
   if (!currentChapter || !currentTranslation) return;
   const refArea = document.getElementById('chapterReflectionArea');
-  const refText = document.getElementById('reflectionText
+  const refText = document.getElementById('reflectionText');
+  const toggleBtn = document.getElementById('toggleReflection');
+  const key = `reflection_${currentChapter}_${currentTranslation}`;
+  refArea.classList.remove('hidden');
+  refText.classList.add('loading');
+  refText.textContent = 'Generating reflection...';
+  toggleBtn.textContent = 'Hide';
+  try {
+    const prompt = `Provide a concise 4-6 sentence reflection on Proverbs chapter ${currentChapter}, highlighting key themes, practical wisdom, and one modern takeaway. Keep it inspirational and educational.`;
+    const reflection = await callDeepSeek(prompt, key);
+    refText.classList.remove('loading');
+    refText.innerHTML = reflection.split('\n').map(line => `<p>${line}</p>`).join('');
+  } catch (err) {
+    refText.classList.remove('loading');
+    refText.textContent = err.message;
+  }
+});
+
+document.getElementById('toggleReflection').addEventListener('click', () => {
+  const refArea = document.getElementById('chapterReflectionArea');
+  const toggleBtn = document.getElementById('toggleReflection');
+  if (refArea.classList.contains('hidden')) {
+    refArea.classList.remove('hidden');
+    toggleBtn.textContent = 'Hide';
+  } else {
+    refArea.classList.add('hidden');
+    toggleBtn.textContent = 'Show';
+  }
+});
+
+// Date override
+document.getElementById('dateOverride').addEventListener('change', () => {
+  const d = getEffectiveDate();
+  localStorage.setItem('dateOverride', document.getElementById('dateOverride').value);
+  const ch = getChapterForDate(d);
+  loadChapter(ch, currentTranslation);
+});
+
+document.getElementById('todayBtn').addEventListener('click', () => {
+  document.getElementById('dateOverride').value = '';
+  localStorage.removeItem('dateOverride');
+  const ch = getChapterForDate(new Date());
+  loadChapter(ch, currentTranslation);
+});
+
+document.getElementById('chapterSelect').addEventListener('change', () => {
+  const ch = parseInt(select.value);
+  if (ch) loadChapter(ch, currentTranslation);
+});
+
+// Translation select
+translationSelect.addEventListener('change', () => {
+  currentTranslation = translationSelect.value;
+  localStorage.setItem('translation', currentTranslation);
+  if (currentChapter) {
+    loadChapter(currentChapter, currentTranslation);
+  }
+});
+
+// Share buttons
+document.getElementById('shareNative').addEventListener('click', async () => {
+  if (navigator.share && currentVerse) {
+    try {
+      await navigator.share({
+        title: 'Proverbs Random Verse',
+        text: currentVerse,
+        url: window.location.href
+      });
+    } catch (err) {
+      alert('Share cancelled or failed');
+    }
+  } else alert('Native share not supported');
+});
+
+document.getElementById('shareWhatsApp').addEventListener('click', () => {
+  if (!currentVerse) return;
+  const url = `https://wa.me/?text=${encodeURIComponent(currentVerse + '\n\nFrom Proverbs Daily Study: ' + window.location.href)}`;
+  window.open(url, '_blank');
+});
+
+document.getElementById('shareTwitter').addEventListener('click', () => {
+  if (!currentVerse) return;
+  const url = `https://twitter.com/intent/tweet?text=${encodeURIComponent(currentVerse)}&url=${encodeURIComponent(window.location.href)}`;
+  window.open(url, '_blank');
+});
+
+document.getElementById('shareFacebook').addEventListener('click', () => {
+  if (!currentVerse) return;
+  const url = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(window.location.href)}&quote=${encodeURIComponent(currentVerse)}`;
+  window.open(url, '_blank');
+});
+
+// Initial load
+async function init() {
+  const storedDate = localStorage.getItem('dateOverride');
+  const storedTrans = localStorage.getItem('translation') || 'web';
+  translationSelect.value = storedTrans;
+  currentTranslation = storedTrans;
+  if (storedDate) {
+    document.getElementById('dateOverride').value = storedDate;
+  }
+  const initialCh = getChapterForDate(getEffectiveDate());
+  await loadChapter(initialCh, currentTranslation);
+}
+init();
+
+// Service Worker registration commented out to disable caching
+// if ('serviceWorker' in navigator) {
+//   window.addEventListener('load', () => {
+ //    navigator.serviceWorker.register('service-worker.js')
+ //      .catch(err => console.error('SW registration failed:', err));
+ //  });
+ //}
