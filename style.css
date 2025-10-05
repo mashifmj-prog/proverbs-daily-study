@@ -1,329 +1,92 @@
-/* Proverbs Daily Study - style.css */
-
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-}
-
-body {
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
-  background-color: #f4f4f9;
-  color: #1a202c;
-  line-height: 1.6;
-}
-
-.app {
-  max-width: 800px;
-  margin: 0 auto;
-  padding: 1rem;
-}
-
-.top {
-  text-align: center;
-  margin-bottom: 1.5rem;
-}
-
-.top h1 {
-  font-size: 1.8rem;
-  color: #2d3748;
-}
-
-.subtitle {
-  font-size: 1rem;
-  color: #4a5568;
-  margin: 0.5rem 0;
-}
-
-.datetime {
-  font-size: 0.9rem;
-  color: #718096;
-  display: flex;
-  justify-content: center;
-  gap: 1rem;
-}
-
-.controls {
-  display: flex;
-  gap: 0.5rem;
-  align-items: center;
-  flex-wrap: wrap;
-  margin-bottom: 1.5rem;
-  padding: 0.5rem;
-  background: #edf2f7;
-  border-radius: 0.5rem;
-}
-
-.controls label {
-  font-size: 0.9rem;
-  color: #2d3748;
-}
-
-.controls input[type="date"],
-.controls select {
-  padding: 0.5rem;
-  border: 1px solid #e2e8f0;
-  border-radius: 0.25rem;
-  font-size: 0.9rem;
-}
-
-.controls button {
-  padding: 0.5rem 1rem;
-  background: #6ee7b7;
-  border: none;
-  border-radius: 0.25rem;
-  color: #1a202c;
-  font-size: 0.9rem;
-  cursor: pointer;
-  transition: background 0.2s;
-}
-
-.controls button:hover {
-  background: #5acfa0;
-}
-
-.chapter-card {
-  background: #fff;
-  border-radius: 0.5rem;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  padding: 1.5rem;
-  margin-bottom: 1.5rem;
-}
-
-.chapter-header {
-  margin-bottom: 1rem;
-}
-
-.chapter-header h2 {
-  font-size: 1.5rem;
-  color: #2d3748;
-}
-
-.meta {
-  display: flex;
-  gap: 0.5rem;
-  font-size: 0.9rem;
-  color: #718096;
-}
-
-.dot {
-  color: #a0aec0;
-}
-
-.chapter-text {
-  max-height: 400px;
-  overflow-y: auto;
-  padding: 0.5rem;
-}
-
-.chapter-text p {
-  margin-bottom: 0.5rem;
-  font-size: 1rem;
-  cursor: pointer;
-  transition: background 0.2s;
-}
-
-.chapter-text p:hover {
-  background: #f7fafc;
-}
-
-.chapter-text:focus {
-  outline: 2px solid #6ee7b7;
-}
-
-.highlight {
-  background-color: #fefcbf;
-}
-
-.actions {
-  display: flex;
-  gap: 0.5rem;
-  margin: 1rem 0;
-  flex-wrap: wrap;
-}
-
-.actions button {
-  padding: 0.5rem 1rem;
-  background: #6ee7b7;
-  border: none;
-  border-radius: 0.25rem;
-  color: #1a202c;
-  font-size: 0.9rem;
-  cursor: pointer;
-  transition: background 0.2s;
-}
-
-.actions button:hover {
-  background: #5acfa0;
-}
-
-.reflection-area,
-.explanation-area {
-  background: #f7fafc;
-  padding: 1rem;
-  border-radius: 0.5rem;
-  margin: 1rem 0;
-  border-left: 4px solid #6ee7b7;
-  transition: max-height 0.3s ease-out;
-  overflow: hidden;
-}
-
-.reflection-area.hidden,
-.explanation-area.hidden {
-  max-height: 0;
-  padding: 0;
-  margin: 0;
-}
-
-.reflection-area h3,
-.explanation-area h4 {
-  font-size: 1.1rem;
-  margin-bottom: 0.5rem;
-  color: #2d3748;
-}
-
-.reflection-area p,
-.explanation-area p {
-  font-style: italic;
-  color: #4a5568;
-  margin-bottom: 0.5rem;
-}
-
-.loading {
-  color: #718096;
-  font-style: italic;
-}
-
-.loading::after {
-  content: ' ⏳';
-  animation: spin 1s linear infinite;
-}
-
-@keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
-}
-
-.random-verse {
-  background: #edf2f7;
-  padding: 1rem;
-  border-radius: 0.5rem;
-  margin-top: 1rem;
-}
-
-.random-verse.hidden {
-  display: none;
-}
-
-.random-verse h3 {
-  font-size: 1.2rem;
-  margin-bottom: 0.5rem;
-}
-
-.random-verse p {
-  font-size: 1rem;
-  margin-bottom: 0.5rem;
-}
-
-#explainVerseBtn {
-  background: #fbbf24;
-  color: #1a202c;
-  margin-bottom: 0.5rem;
-}
-
-#explainVerseBtn:hover {
-  background: #f59e0b;
-}
-
-.share-buttons {
-  display: flex;
-  gap: 0.5rem;
-  flex-wrap: wrap;
-}
-
-.share-buttons button,
-#closeRandom,
-#toggleReflection {
-  padding: 0.5rem 1rem;
-  background: #e2e8f0;
-  border: none;
-  border-radius: 0.25rem;
-  color: #1a202c;
-  font-size: 0.9rem;
-  cursor: pointer;
-  transition: background 0.2s;
-}
-
-.share-buttons button:hover,
-#closeRandom:hover,
-#toggleReflection:hover {
-  background: #cbd5e0;
-}
-
-#toggleReflection {
-  background: #6ee7b7;
-  color: #1a202c;
-}
-
-.footer-note {
-  font-size: 0.8rem;
-  color: #718096;
-  text-align: center;
-  margin-top: 1rem;
-}
-
-.tips {
-  font-size: 0.9rem;
-  color: #4a5568;
-  padding: 1rem;
-  background: #edf2f7;
-  border-radius: 0.5rem;
-}
-
-.tips h4 {
-  font-size: 1.1rem;
-  margin-bottom: 0.5rem;
-}
-
-.tips ul {
-  list-style: disc;
-  padding-left: 1.5rem;
-}
-
-.tips a {
-  color: #6ee7b7;
-}
-
-@media (max-width: 600px) {
-  .app {
-    padding: 0.5rem;
-  }
-
-  .top h1 {
-    font-size: 1.5rem;
-  }
-
-  .controls {
-    flex-direction: column;
-    align-items: stretch;
-  }
-
-  .controls input[type="date"],
-  .controls select,
-  .controls button {
-    width: 100%;
-    margin-bottom: 0.5rem;
-  }
-
-  .actions,
-  .share-buttons {
-    flex-direction: column;
-  }
-
-  .actions button,
-  .share-buttons button,
-  #closeRandom,
-  #toggleReflection {
-    width: 100%;
-  }
-}
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Proverbs — Daily Study</title>
+  <link rel="stylesheet" href="style.css" />
+  <link rel="manifest" href="manifest.json" />
+  <meta name="theme-color" content="#6ee7b7" />
+</head>
+<body>
+  <main class="app">
+    <header class="top">
+      <h1>Proverbs — Daily Study</h1>
+      <p class="subtitle">One chapter a day (chapter 1 on the 1st, chapter 2 on the 2nd, …)</p>
+      <div class="datetime">
+        <span id="liveDate"></span>
+        <span id="liveClock"></span>
+      </div>
+    </header>
+    <section class="controls">
+      <label for="dateOverride">Use date:</label>
+      <input id="dateOverride" type="date" />
+      <button id="todayBtn">Today</button>
+      <label for="chapterSelect">Or chapter:</label>
+      <select id="chapterSelect">
+        <option value="">Auto</option>
+      </select>
+      <label for="translationSelect">Translation:</label>
+      <select id="translationSelect">
+        <option value="web">World English Bible (WEB)</option>
+        <option value="kjv">King James Version (KJV)</option>
+        <option value="asv">American Standard Version (ASV)</option>
+        <option value="bbe">Bible in Basic English (BBE)</option>
+        <option value="ceb">Common English Bible (CEB)</option>
+        <option value="ylt">Young's Literal Translation (YLT)</option>
+      </select>
+    </section>
+    <section class="chapter-card">
+      <div class="chapter-header">
+        <h2 id="chapterTitle">Chapter X</h2>
+        <div class="meta">
+          <span id="chapterNumber">#</span>
+          <span class="dot">•</span>
+          <span id="chapterDate">Date</span>
+        </div>
+      </div>
+      <div id="chapterText" class="chapter-text" tabindex="0"></div>
+      <div class="actions">
+        <button id="randomVerseBtn">Pick a random verse</button>
+        <button id="copyChapterBtn">Copy chapter text</button>
+        <button id="chapterReflectionBtn">Chapter Reflection</button>
+      </div>
+      <div id="chapterReflectionArea" class="reflection-area hidden">
+        <h3>Chapter Reflection</h3>
+        <div id="reflectionText" class="loading">Loading reflection...</div>
+        <button id="toggleReflection">Hide</button>
+      </div>
+      <div id="randomVerseArea" class="random-verse hidden">
+        <h3>Random verse</h3>
+        <p id="randomVerseText"></p>
+        <button id="explainVerseBtn">Explain This Verse</button>
+        <div id="verseExplanationArea" class="explanation-area hidden">
+          <h4>Explanation</h4>
+          <div id="explanationText" class="loading">Loading explanation...</div>
+        </div>
+        <div class="share-buttons">
+          <button id="shareNative">Share (device)</button>
+          <button id="shareWhatsApp">WhatsApp</button>
+          <button id="shareTwitter">Twitter</button>
+          <button id="shareFacebook">Facebook</button>
+          <button id="copyVerseBtn">Copy verse</button>
+        </div>
+        <button id="closeRandom">Close</button>
+      </div>
+      <footer class="footer-note">
+        <small id="footerNote">Translation: World English Bible (Public Domain). Loaded dynamically.</small>
+      </footer>
+    </section>
+    <aside class="tips">
+      <h4>Tips</h4>
+      <ul>
+        <li>The app maps day-of-month to Proverbs chapter (1 → chapter 1, … 31 → chapter 31).</li>
+        <li>Months with fewer days automatically end with the last day.</li>
+        <li>Switch translations anytime—cached for offline use!</li>
+        <li>AI insights powered by free DeepSeek (via OpenRouter)—no key needed!</li>
+      </ul>
+    </aside>
+  </main>
+  <script src="script.js" defer></script>
+</body>
+</html>
