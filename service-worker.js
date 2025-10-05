@@ -1,26 +1,44 @@
-// service-worker.js - Modified to unregister and clear caches
+const CACHE_NAME = 'proverbs-cache-v2';
+     const FILES_TO_CACHE = [
+       '/',
+       '/index.html',
+       '/style.css',
+       '/script.js',
+       '/manifest.json',
+       '/icon-192.png',
+       '/icon-512.png'
+     ];
 
-self.addEventListener('install', event => {
-  // Skip waiting to immediately take control
-  self.skipWaiting();
-});
+     self.addEventListener('install', event => {
+       event.waitUntil(
+         caches.open(CACHE_NAME).then(cache => cache.addAll(FILES_TO_CACHE))
+       );
+       self.skipWaiting();
+     });
 
-self.addEventListener('activate', event => {
-  event.waitUntil(
-    Promise.all([
-      // Clear all caches
-      caches.keys().then(keyList => Promise.all(
-        keyList.map(key => caches.delete(key))
-      )),
-      // Unregister this Service Worker
-      self.registration.unregister()
-    ]).then(() => {
-      console.log('Service Worker unregistered and all caches cleared');
-    })
-  );
-});
+     self.addEventListener('activate', event => {
+       event.waitUntil(
+         caches.keys().then(keyList => Promise.all(
+           keyList.map(key => key !== CACHE_NAME ? caches.delete(key) : null)
+         ))
+       );
+       self.clients.claim();
+     });
 
-// No fetch handling to prevent caching
-self.addEventListener('fetch', event => {
-  event.respondWith(fetch(event.request));
-});
+     self.addEventListener('fetch', event => {
+       if (event.request.url.includes('bible-api.com')) {
+         event.respondWith(
+           fetch(event.request)
+             .then(res => {
+               const resClone = res.clone();
+               caches.open(CACHE_NAME).then(cache => cache.put(event.request, resClone));
+               return res;
+             })
+             .catch(() => caches.match(event.request))
+         );
+       } else {
+         event.respondWith(
+           caches.match(event.request).then(resp => resp || fetch(event.request))
+         );
+       }
+     });
