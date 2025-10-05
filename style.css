@@ -1,0 +1,113 @@
+body {
+  font-family: Arial, sans-serif;
+  margin: 0;
+  padding: 0;
+  background-color: #f4f4f4;
+}
+
+.app {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+.top {
+  text-align: center;
+}
+
+.subtitle {
+  font-style: italic;
+  color: #666;
+}
+
+.datetime {
+  font-size: 0.9em;
+  color: #333;
+}
+
+.controls {
+  display: flex;
+  gap: 10px;
+  margin: 20px 0;
+  flex-wrap: wrap;
+}
+
+.chapter-card {
+  background: white;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.chapter-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.meta {
+  font-size: 0.9em;
+  color: #666;
+}
+
+.dot {
+  margin: 0 5px;
+}
+
+.chapter-text {
+  line-height: 1.6;
+}
+
+.verse {
+  margin: 10px 0;
+}
+
+.actions {
+  display: flex;
+  gap: 10px;
+  margin: 20px 0;
+}
+
+.reflection-area, .random-verse, .explanation-area {
+  margin-top: 20px;
+  padding: 10px;
+  background: #f9f9f9;
+  border-radius: 4px;
+}
+
+.hidden {
+  display: none;
+}
+
+.share-buttons {
+  display: flex;
+  gap: 10px;
+}
+
+.footer-note {
+  font-size: 0.8em;
+  color: #666;
+  margin-top: 20px;
+}
+
+.tips {
+  margin-top: 20px;
+  font-size: 0.9em;
+}
+
+button {
+  padding: 8px 16px;
+  background: #6ee7b7;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+button:hover {
+  background: #5cd5a3;
+}
+
+.loading {
+  color: #999;
+  font-style: italic;
+}
