@@ -1,0 +1,87 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Proverbs — Daily Study</title>
+  <link rel="stylesheet" href="style.css" />
+  <link rel="manifest" href="app-manifest.json" />
+  <meta name="theme-color" content="#6ee7b7" />
+</head>
+<body>
+  <main class="app">
+    <header class="top">
+      <h1>Proverbs — Daily Study</h1>
+      <p class="subtitle">One chapter a day (chapter 1 on the 1st, chapter 2 on the 2nd, …)</p>
+      <div class="datetime">
+        <span id="liveDate"></span>
+        <span id="liveClock"></span>
+      </div>
+    </header>
+    <section class="controls">
+      <label for="dateOverride">Use date:</label>
+      <input id="dateOverride" type="date" />
+      <button id="todayBtn">Today</button>
+      <label for="chapterSelect">Or chapter:</label>
+      <select id="chapterSelect">
+        <option value="">Auto</option>
+      </select>
+      <label for="translationSelect">Translation:</label>
+      <select id="translationSelect">
+        <option value="kjv">King James Version (KJV)</option>
+      </select>
+    </section>
+    <section class="chapter-card">
+      <div class="chapter-header">
+        <h2 id="chapterTitle">Chapter X</h2>
+        <div class="meta">
+          <span id="chapterNumber">#</span>
+          <span class="dot">•</span>
+          <span id="chapterDate">Date</span>
+        </div>
+      </div>
+      <div id="chapterText" class="chapter-text" tabindex="0"></div>
+      <div class="actions">
+        <button id="randomVerseBtn">Pick a random verse</button>
+        <button id="copyChapterBtn">Copy chapter text</button>
+        <button id="chapterReflectionBtn">Chapter Reflection</button>
+      </div>
+      <div id="chapterReflectionArea" class="reflection-area hidden">
+        <h3>Chapter Reflection</h3>
+        <div id="reflectionText" class="loading">Loading reflection...</div>
+        <button id="toggleReflection">Hide</button>
+      </div>
+      <div id="randomVerseArea" class="random-verse hidden">
+        <h3>Random verse</h3>
+        <p id="randomVerseText"></p>
+        <button id="explainVerseBtn">Explain This Verse</button>
+        <div id="verseExplanationArea" class="explanation-area hidden">
+          <h4>Explanation</h4>
+          <div id="explanationText" class="loading">Loading explanation...</div>
+        </div>
+        <div class="share-buttons">
+          <button id="shareNative">Share (device)</button>
+          <button id="shareWhatsApp">WhatsApp</button>
+          <button id="shareTwitter">Twitter</button>
+          <button id="shareFacebook">Facebook</button>
+          <button id="copyVerseBtn">Copy verse</button>
+        </div>
+        <button id="closeRandom">Close</button>
+      </div>
+      <footer class="footer-note">
+        <small id="footerNote">Translation: King James Version (KJV). Loaded dynamically.</small>
+      </footer>
+    </section>
+    <aside class="tips">
+      <h4>Tips</h4>
+      <ul>
+        <li>The app maps day-of-month to Proverbs chapter (1 → chapter 1, … 31 → chapter 31).</li>
+        <li>Months with fewer days automatically end with the last day.</li>
+        <li>Switch chapters or dates anytime—cached for offline use!</li>
+        <li>AI insights powered by free DeepSeek (via OpenRouter)—no key needed!</li>
+      </ul>
+    </aside>
+  </main>
+  <script src="script.js" defer></script>
+</body>
+</html>
