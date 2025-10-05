@@ -5,8 +5,6 @@ const clockElem = document.getElementById('liveClock');
 const chapterText = document.getElementById('chapterText');
 const footerNote = document.getElementById('footerNote');
 const translationSelect = document.getElementById('translationSelect');
-const apiKeyInput = document.getElementById('apiKeyInput');
-const saveApiKeyBtn = document.getElementById('saveApiKey');
 let chapters = {}; // { '5_web': ['1: verse1', ...] }
 let explanations = {}; // Cache: { '5_web_verse1': 'explanation text' }
 let reflections = {}; // Cache: { '5_web': 'reflection text' }
@@ -24,54 +22,35 @@ const translations = {
   ylt: 'Young\'s Literal Translation (YLT)'
 };
 
-// Grok API config
-const GROK_API_URL = 'https://api.x.ai/v1/chat/completions';
-const GROK_MODEL = 'grok-3-mini'; // Cost-efficient for short outputs
+// DeepSeek API config (free via OpenRouter)
+const DEEPSEEK_API_URL = 'https://openrouter.ai/api/v1/chat/completions';
+const DEEPSEEK_MODEL = 'deepseek/deepseek-r1:free'; // Free tier model
 
-// Get API key
-function getApiKey() {
-  return localStorage.getItem('grokApiKey') || '';
-}
-
-// Save API key
-saveApiKeyBtn.addEventListener('click', () => {
-  const key = apiKeyInput.value.trim();
-  if (key) {
-    localStorage.setItem('grokApiKey', key);
-    alert('API key saved! Refresh for new content.');
-    apiKeyInput.value = '';
-  } else {
-    alert('Please enter a valid key.');
-  }
-});
-
-// Load saved key on init
-apiKeyInput.value = getApiKey();
-
-// Call Grok API
-async function callGrok(prompt, cacheKey) {
-  const apiKey = getApiKey();
-  if (!apiKey) {
-    throw new Error('API key required. Add via settings.');
-  }
+// Call DeepSeek API (no key needed for free tier)
+async function callDeepSeek(prompt, cacheKey) {
+  // Check cache first
   if (explanations[cacheKey] || reflections[cacheKey]) {
     return explanations[cacheKey] || reflections[cacheKey];
   }
   try {
-    const response = await fetch(GROK_API_URL, {
+    const response = await fetch(DEEPSEEK_API_URL, {
       method: 'POST',
       headers: {
-        'Authorization': `Bearer ${apiKey}`,
-        'Content-Type': 'application/json'
+        'Content-Type': 'application/json',
+        'HTTP-Referer': window.location.origin, // Optional for OpenRouter
+        'X-Title': 'Proverbs Daily Study' // Optional
       },
       body: JSON.stringify({
-        model: GROK_MODEL,
+        model: DEEPSEEK_MODEL,
         messages: [{ role: 'user', content: prompt }],
         max_tokens: 150, // Keep concise
         temperature: 0.7
       })
     });
-    if (!response.ok) throw new Error('API request failed');
+    if (!response.ok) {
+      if (response.status >= 429) throw new Error('Free tier limit reached—try again tomorrow.');
+      throw new Error('API request failed—check connection.');
+    }
     const data = await response.json();
     const output = data.choices[0].message.content.trim();
     if (cacheKey.startsWith('verse_')) {
@@ -81,7 +60,7 @@ async function callGrok(prompt, cacheKey) {
     }
     return output;
   } catch (err) {
-    console.error('Grok API error:', err);
+    console.error('DeepSeek API error:', err);
     throw err;
   }
 }
@@ -231,7 +210,7 @@ document.getElementById('explainVerseBtn').addEventListener('click', async () =>
   explText.textContent = 'Generating explanation...';
   try {
     const prompt = `Explain this Proverbs verse in exactly 3 concise lines, focusing on its wisdom, historical context, and modern application: "${currentVerse}"`;
-    const explanation = await callGrok(prompt, key);
+    const explanation = await callDeepSeek(prompt, key);
     explText.classList.remove('loading');
     explText.innerHTML = explanation.split('\n').map(line => `<p>${line}</p>`).join('');
   } catch (err) {
@@ -263,7 +242,7 @@ document.getElementById('chapterReflectionBtn').addEventListener('click', async 
   toggleBtn.textContent = 'Hide';
   try {
     const prompt = `Provide a concise 4-6 sentence reflection on Proverbs chapter ${currentChapter}, highlighting key themes, practical wisdom, and one modern takeaway. Keep it inspirational and educational.`;
-    const reflection = await callGrok(prompt, key);
+    const reflection = await callDeepSeek(prompt, key);
     refText.classList.remove('loading');
     refText.innerHTML = reflection.split('\n').map(line => `<p>${line}</p>`).join('');
   } catch (err) {
