@@ -60,6 +60,7 @@ body {
 }
 
 .controls input[type="date"],
+.controls input[type="password"],
 .controls select {
   padding: 0.5rem;
   border: 1px solid #e2e8f0;
@@ -119,6 +120,12 @@ body {
 .chapter-text p {
   margin-bottom: 0.5rem;
   font-size: 1rem;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.chapter-text p:hover {
+  background: #f7fafc;
 }
 
 .chapter-text:focus {
@@ -133,6 +140,7 @@ body {
   display: flex;
   gap: 0.5rem;
   margin: 1rem 0;
+  flex-wrap: wrap;
 }
 
 .actions button {
@@ -148,6 +156,53 @@ body {
 
 .actions button:hover {
   background: #5acfa0;
+}
+
+.reflection-area,
+.explanation-area {
+  background: #f7fafc;
+  padding: 1rem;
+  border-radius: 0.5rem;
+  margin: 1rem 0;
+  border-left: 4px solid #6ee7b7;
+  transition: max-height 0.3s ease-out;
+  overflow: hidden;
+}
+
+.reflection-area.hidden,
+.explanation-area.hidden {
+  max-height: 0;
+  padding: 0;
+  margin: 0;
+}
+
+.reflection-area h3,
+.explanation-area h4 {
+  font-size: 1.1rem;
+  margin-bottom: 0.5rem;
+  color: #2d3748;
+}
+
+.reflection-area p,
+.explanation-area p {
+  font-style: italic;
+  color: #4a5568;
+  margin-bottom: 0.5rem;
+}
+
+.loading {
+  color: #718096;
+  font-style: italic;
+}
+
+.loading::after {
+  content: ' ⏳';
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
 }
 
 .random-verse {
@@ -171,6 +226,16 @@ body {
   margin-bottom: 0.5rem;
 }
 
+#explainVerseBtn {
+  background: #fbbf24;
+  color: #1a202c;
+  margin-bottom: 0.5rem;
+}
+
+#explainVerseBtn:hover {
+  background: #f59e0b;
+}
+
 .share-buttons {
   display: flex;
   gap: 0.5rem;
@@ -178,7 +243,8 @@ body {
 }
 
 .share-buttons button,
-#closeRandom {
+#closeRandom,
+#toggleReflection {
   padding: 0.5rem 1rem;
   background: #e2e8f0;
   border: none;
@@ -190,8 +256,14 @@ body {
 }
 
 .share-buttons button:hover,
-#closeRandom:hover {
+#closeRandom:hover,
+#toggleReflection:hover {
   background: #cbd5e0;
+}
+
+#toggleReflection {
+  background: #6ee7b7;
+  color: #1a202c;
 }
 
 .footer-note {
@@ -219,6 +291,10 @@ body {
   padding-left: 1.5rem;
 }
 
+.tips a {
+  color: #6ee7b7;
+}
+
 @media (max-width: 600px) {
   .app {
     padding: 0.5rem;
@@ -234,6 +310,7 @@ body {
   }
 
   .controls input[type="date"],
+  .controls input[type="password"],
   .controls select,
   .controls button {
     width: 100%;
@@ -247,7 +324,8 @@ body {
 
   .actions button,
   .share-buttons button,
-  #closeRandom {
+  #closeRandom,
+  #toggleReflection {
     width: 100%;
   }
 }
