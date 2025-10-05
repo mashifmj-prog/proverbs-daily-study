@@ -87,35 +87,18 @@ function getChapterForDate(d) {
   return Math.min(day, lastDay);
 }
 
-// Fetch and cache chapter with translation
+// Fetch chapter (no caching)
 async function loadChapter(ch, trans = currentTranslation) {
-  const key = `${ch}_${trans}`;
   const baseURL = `https://bible-api.com/proverbs ${ch}?translation=${trans}`;
-  let cachedData = null;
-  if ('caches' in window) {
-    const cache = await caches.open('proverbs-cache-v2');
-    const match = await cache.match(baseURL);
-    if (match) cachedData = await match.json();
-  }
-  if (cachedData) {
-    processChapter(cachedData, ch, trans);
-    return;
-  }
   chapterText.innerHTML = '<p class="loading">Loading chapter…</p>';
   try {
     const res = await fetch(baseURL);
     if (!res.ok) throw new Error('Fetch failed');
     const data = await res.json();
     processChapter(data, ch, trans);
-    if ('caches' in window) {
-      const cache = await caches.open('proverbs-cache-v2');
-      cache.put(baseURL, new Response(JSON.stringify(data)));
-    }
   } catch (err) {
     console.error('Failed to fetch chapter:', err);
-    if (!cachedData) {
-      chapterText.innerHTML = '<p>Error loading chapter. Please check your internet connection and try again.</p>';
-    }
+    chapterText.innerHTML = '<p>Error loading chapter. Please check your internet connection and try again.</p>';
   }
 }
 
@@ -338,11 +321,3 @@ async function init() {
   await loadChapter(initialCh, currentTranslation);
 }
 init();
-
-// Register service worker
-if ('serviceWorker' in navigator) {
-  window.addEventListener('load', () => {
-    navigator.serviceWorker.register('service-worker.js')
-      .catch(err => console.error('SW registration failed:', err));
-  });
-}
