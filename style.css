@@ -60,7 +60,6 @@ body {
 }
 
 .controls input[type="date"],
-.controls input[type="password"],
 .controls select {
   padding: 0.5rem;
   border: 1px solid #e2e8f0;
@@ -310,7 +309,6 @@ body {
   }
 
   .controls input[type="date"],
-  .controls input[type="password"],
   .controls select,
   .controls button {
     width: 100%;
