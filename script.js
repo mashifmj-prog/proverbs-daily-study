@@ -93,7 +93,7 @@ async function loadChapter(ch, trans = currentTranslation) {
   const baseURL = `https://bible-api.com/proverbs ${ch}?translation=${trans}`;
   let cachedData = null;
   if ('caches' in window) {
-    const cache = await caches.open('proverbs-cache-v1');
+    const cache = await caches.open('proverbs-cache-v2');
     const match = await cache.match(baseURL);
     if (match) cachedData = await match.json();
   }
@@ -108,7 +108,7 @@ async function loadChapter(ch, trans = currentTranslation) {
     const data = await res.json();
     processChapter(data, ch, trans);
     if ('caches' in window) {
-      const cache = await caches.open('proverbs-cache-v1');
+      const cache = await caches.open('proverbs-cache-v2');
       cache.put(baseURL, new Response(JSON.stringify(data)));
     }
   } catch (err) {
