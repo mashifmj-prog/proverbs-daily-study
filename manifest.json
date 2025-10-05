@@ -1,18 +1,19 @@
 {
-  "name": "Proverbs Daily Study",
+  "name": "Proverbs — Daily Study",
   "short_name": "Proverbs",
-  "start_url": ".",
+  "description": "Read one chapter of Proverbs each day, matching the day of the month.",
+  "start_url": "/",
   "display": "standalone",
-  "background_color": "#0f1724",
+  "background_color": "#f4f4f9",
   "theme_color": "#6ee7b7",
   "icons": [
     {
-      "src": "icon-192.png",
+      "src": "/icon-192.png",
       "sizes": "192x192",
       "type": "image/png"
     },
     {
-      "src": "icon-512.png",
+      "src": "/icon-512.png",
       "sizes": "512x512",
       "type": "image/png"
     }
