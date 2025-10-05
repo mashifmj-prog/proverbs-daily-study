@@ -13,20 +13,20 @@
     <header class="top">
       <h1>Proverbs — Daily Study</h1>
       <p class="subtitle">One chapter a day (chapter 1 on the 1st, chapter 2 on the 2nd, …)</p>
-
       <div class="datetime">
         <span id="liveDate"></span>
         <span id="liveClock"></span>
       </div>
     </header>
-
     <section class="controls">
       <label for="dateOverride">Use date:</label>
       <input id="dateOverride" type="date" />
-      <button id="applyDate">Apply</button>
       <button id="todayBtn">Today</button>
+      <label for="chapterSelect">Or chapter:</label>
+      <select id="chapterSelect">
+        <option value="">Auto</option>
+      </select>
     </section>
-
     <section class="chapter-card">
       <div class="chapter-header">
         <h2 id="chapterTitle">Chapter X</h2>
@@ -36,14 +36,11 @@
           <span id="chapterDate">Date</span>
         </div>
       </div>
-
       <div id="chapterText" class="chapter-text" tabindex="0"></div>
-
       <div class="actions">
         <button id="randomVerseBtn">Pick a random verse</button>
         <button id="copyChapterBtn">Copy chapter text</button>
       </div>
-
       <div id="randomVerseArea" class="random-verse hidden">
         <h3>Random verse</h3>
         <p id="randomVerseText"></p>
@@ -54,13 +51,12 @@
           <button id="shareFacebook">Facebook</button>
           <button id="copyVerseBtn">Copy verse</button>
         </div>
+        <button id="closeRandom">Close</button>
       </div>
-
       <footer class="footer-note">
         <small>Translation: World English Bible (Public Domain). Loaded dynamically.</small>
       </footer>
     </section>
-
     <aside class="tips">
       <h4>Tips</h4>
       <ul>
@@ -69,7 +65,6 @@
       </ul>
     </aside>
   </main>
-
   <script src="script.js" defer></script>
 </body>
 </html>
