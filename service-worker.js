@@ -10,7 +10,9 @@ const FILES_TO_CACHE = [
 ];
 
 self.addEventListener('install', event => {
-  event.waitUntil(caches.open(CACHE_NAME).then(cache => cache.addAll(FILES_TO_CACHE)));
+  event.waitUntil(
+    caches.open(CACHE_NAME).then(cache => cache.addAll(FILES_TO_CACHE))
+  );
   self.skipWaiting();
 });
 
@@ -24,7 +26,7 @@ self.addEventListener('activate', event => {
 });
 
 self.addEventListener('fetch', event => {
-  if (event.request.url.includes('proverbs.json')) {
+  if (event.request.url.includes('bible-api.com')) {
     event.respondWith(
       fetch(event.request)
         .then(res => {
@@ -35,6 +37,8 @@ self.addEventListener('fetch', event => {
         .catch(() => caches.match(event.request))
     );
   } else {
-    event.respondWith(caches.match(event.request).then(resp => resp || fetch(event.request)));
+    event.respondWith(
+      caches.match(event.request).then(resp => resp || fetch(event.request))
+    );
   }
 });
