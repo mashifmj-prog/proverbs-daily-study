@@ -14,12 +14,8 @@ let currentTranslation = 'web';
 
 // Translation map
 const translations = {
-  web: 'World English Bible (WEB)',
-  kjv: 'King James Version (KJV)',
-  asv: 'American Standard Version (ASV)',
-  bbe: 'Bible in Basic English (BBE)',
-  ceb: 'Common English Bible (CEB)',
-  ylt: 'Young\'s Literal Translation (YLT)'
+  web: 'World English Bible (WEB)'
+  // Other translations disabled until their JSON files are added
 };
 
 // DeepSeek API config (free via OpenRouter)
@@ -28,10 +24,9 @@ const DEEPSEEK_MODEL = 'deepseek/deepseek-r1:free'; // Free tier model
 
 // Call DeepSeek API (no key needed for free tier)
 async function callDeepSeek(prompt, cacheKey) {
-  // Check cache first (load from localStorage if needed)
   const storedExplanations = JSON.parse(localStorage.getItem('explanations') || '{}');
   const storedReflections = JSON.parse(localStorage.getItem('reflections') || '{}');
-  if ((explanations[cacheKey] || storedExplanations[cacheKey]) || (reflections[cacheKey] || storedReflections[cacheKey])) {
+  if (explanations[cacheKey] || storedExplanations[cacheKey] || reflections[cacheKey] || storedReflections[cacheKey]) {
     const output = explanations[cacheKey] || storedExplanations[cacheKey] || reflections[cacheKey] || storedReflections[cacheKey];
     return output;
   }
@@ -40,13 +35,13 @@ async function callDeepSeek(prompt, cacheKey) {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'HTTP-Referer': window.location.origin, // Optional for OpenRouter
-        'X-Title': 'Proverbs Daily Study' // Optional
+        'HTTP-Referer': window.location.origin,
+        'X-Title': 'Proverbs Daily Study'
       },
       body: JSON.stringify({
         model: DEEPSEEK_MODEL,
         messages: [{ role: 'user', content: prompt }],
-        max_tokens: 150, // Keep concise
+        max_tokens: 150,
         temperature: 0.7
       })
     });
@@ -94,34 +89,34 @@ function getChapterForDate(d) {
 
 // Load chapter from bundled JSON (with localStorage cache)
 async function loadChapter(ch, trans = currentTranslation) {
-  const jsonFile = `./${trans}-proverbs.json`;
+  const jsonFile = trans === 'web' ? '/web-proverbs.json' : null; // Absolute path for GitHub Pages
   const cacheKey = `chapters_${trans}`;
   chapterText.innerHTML = '<p class="loading">Loading chapter…</p>';
 
   // Try localStorage cache first (offline fallback)
   const cachedChapters = JSON.parse(localStorage.getItem(cacheKey) || '{}');
   if (cachedChapters[ch]) {
-    chapters[`${ch}_${trans}`] = cachedChapters[ch];
+    chapters[`${ch}_${trans}`] = cachedChapters[ch].verses;
     renderChapter(ch, trans);
     return;
   }
 
+  // If no cache, try fetching or use bundled data
   try {
+    if (!navigator.onLine) throw new Error('Offline: Please connect to the internet to load chapters.');
     const res = await fetch(jsonFile);
-    if (!res.ok) throw new Error('Local file not found—ensure JSON is in repo.');
+    if (!res.ok) throw new Error(`Failed to load ${jsonFile}: File not found or inaccessible.`);
     const data = await res.json();
     const chapterData = data.chapters[ch.toString()];
-    if (!chapterData) throw new Error('Chapter not in JSON.');
-    
+    if (!chapterData || !chapterData.verses) throw new Error(`Chapter ${ch} not found in ${jsonFile}.`);
+
     chapters[`${ch}_${trans}`] = chapterData.verses;
-    // Cache full translation if not already
-    if (!localStorage.getItem(cacheKey)) {
-      localStorage.setItem(cacheKey, JSON.stringify(data.chapters));
-    }
+    // Update cache with full translation data
+    localStorage.setItem(cacheKey, JSON.stringify(data.chapters));
     renderChapter(ch, trans);
   } catch (err) {
     console.error('Failed to load chapter:', err);
-    chapterText.innerHTML = '<p>Error loading chapter. Using cache or check files. Offline? Preload once online.</p>';
+    chapterText.innerHTML = `<p>Error loading chapter: ${err.message}. Please ensure you are online and try again.</p>`;
   }
 }
 
@@ -136,7 +131,7 @@ function renderChapter(ch, trans) {
   footerNote.textContent = `Translation: ${translations[trans]} (Public Domain). Loaded dynamically.`;
   chapterText.innerHTML = '';
   if (!chData) {
-    chapterText.innerHTML = '<p class="loading">Loading chapter…</p>';
+    chapterText.innerHTML = '<p class="loading">No chapter data available.</p>';
     return;
   }
   chData.forEach(verse => {
@@ -189,8 +184,7 @@ document.getElementById('randomVerseBtn').addEventListener('click', () => {
   currentVerse = `${verseObj.reference}: ${verseObj.text}`;
   document.getElementById('randomVerseArea').classList.remove('hidden');
   document.getElementById('randomVerseText').innerHTML = `<sup>${verseObj.reference.split(':')[1]}</sup> ${verseObj.text}`;
-  document.getElementById('verseExplanationArea').classList.add('hidden'); // Reset
-  // Highlight in chapter
+  document.getElementById('verseExplanationArea').classList.add('hidden');
   document.querySelectorAll('#chapterText .verse').forEach(p => {
     p.classList.toggle('highlight', p.innerHTML.includes(verseObj.text));
   });
@@ -206,7 +200,7 @@ document.getElementById('explainVerseBtn').addEventListener('click', async () =>
   if (!currentVerse) return;
   const explArea = document.getElementById('verseExplanationArea');
   const explText = document.getElementById('explanationText');
-  const key = `verse_${btoa(currentVerse)}_${currentTranslation}`; // Simple cache key
+  const key = `verse_${btoa(currentVerse)}_${currentTranslation}`;
   explArea.classList.remove('hidden');
   explText.classList.add('loading');
   explText.textContent = 'Generating explanation...';
