@@ -1,4 +1,4 @@
-const CACHE_NAME = 'proverbs-cache-v1';
+const CACHE_NAME = 'proverbs-cache-v2'; // Changed from v1 to v2
 const FILES_TO_CACHE = [
   '/',
   '/index.html',
