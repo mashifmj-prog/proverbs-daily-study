@@ -1,9 +1,12 @@
-const CACHE_NAME = 'proverbs-cache-base-v2';
-// We’ll store specific translation caches too: proverbs-cache-WEB, proverbs-cache-KJV, etc.
-
+const CACHE_NAME = 'proverbs-cache-v1';
 const FILES_TO_CACHE = [
-  '/', '/index.html', '/style.css', '/script.js', '/manifest.json',
-  '/icon-192.png', '/icon-512.png'
+  '/',
+  '/index.html',
+  '/style.css',
+  '/script.js',
+  '/manifest.json',
+  '/icon-192.png',
+  '/icon-512.png'
 ];
 
 self.addEventListener('install', event => {
@@ -15,38 +18,27 @@ self.addEventListener('install', event => {
 
 self.addEventListener('activate', event => {
   event.waitUntil(
-    caches.keys().then(keys =>
-      Promise.all(
-        keys.map(key => {
-          if (key !== CACHE_NAME && !key.startsWith('proverbs-cache-')) {
-            return caches.delete(key);
-          }
-          return null;
-        })
-      )
-    )
+    caches.keys().then(keyList => Promise.all(
+      keyList.map(key => key !== CACHE_NAME ? caches.delete(key) : null)
+    ))
   );
   self.clients.claim();
 });
 
 self.addEventListener('fetch', event => {
-  const req = event.request;
-  const url = new URL(req.url);
-
-  // If request is for a translation JSON
-  if (url.pathname.endsWith('proverbs.json') || url.hostname.includes('example.com')) {
+  if (event.request.url.includes('bible-api.com')) {
     event.respondWith(
-      caches.match(req).then(resp => resp || fetch(req).then(res => {
-        const clone = res.clone();
-        caches.open(CACHE_NAME).then(cache => cache.put(req, clone));
-        return res;
-      }))
+      fetch(event.request)
+        .then(res => {
+          const resClone = res.clone();
+          caches.open(CACHE_NAME).then(cache => cache.put(event.request, resClone));
+          return res;
+        })
+        .catch(() => caches.match(event.request))
     );
-    return;
+  } else {
+    event.respondWith(
+      caches.match(event.request).then(resp => resp || fetch(event.request))
+    );
   }
-
-  // Otherwise, default cache-first for app shell
-  event.respondWith(
-    caches.match(req).then(resp => resp || fetch(req))
-  );
 });
