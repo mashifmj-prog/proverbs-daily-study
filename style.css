@@ -1,113 +1,43 @@
-body {
-  font-family: Arial, sans-serif;
-  margin: 0;
-  padding: 0;
-  background-color: #f4f4f4;
+/* Existing styles (assumed) ... */
+
+/* Fade-in for each pane */
+.chapter-text-pane {
+  opacity: 0;
+  transition: opacity 0.5s ease-in-out;
 }
 
-.app {
-  max-width: 800px;
-  margin: 0 auto;
-  padding: 20px;
+.chapter-text-pane.show {
+  opacity: 1;
 }
 
-.top {
-  text-align: center;
+/* Highlight verse numbers */
+.chapter-text-pane p span.verse-number {
+  color: #16a34a;
+  font-weight: bold;
 }
 
-.subtitle {
-  font-style: italic;
-  color: #666;
-}
-
-.datetime {
-  font-size: 0.9em;
-  color: #333;
-}
-
-.controls {
+/* Parallel mode container: side-by-side */
+.chapter-container {
   display: flex;
-  gap: 10px;
-  margin: 20px 0;
-  flex-wrap: wrap;
+  gap: 1rem;
 }
 
-.chapter-card {
-  background: white;
-  padding: 20px;
-  border-radius: 8px;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+.chapter-text-pane {
+  flex: 1;
+  overflow-y: auto;
+  max-height: 400px; /* or adapt to your layout */
 }
 
-.chapter-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-.meta {
-  font-size: 0.9em;
-  color: #666;
-}
-
-.dot {
-  margin: 0 5px;
-}
-
-.chapter-text {
-  line-height: 1.6;
-}
-
-.verse {
-  margin: 10px 0;
-}
-
-.actions {
-  display: flex;
-  gap: 10px;
-  margin: 20px 0;
-}
-
-.reflection-area, .random-verse, .explanation-area {
-  margin-top: 20px;
-  padding: 10px;
-  background: #f9f9f9;
-  border-radius: 4px;
-}
-
+/* Hide this pane when not used */
 .hidden {
-  display: none;
+  display: none !important;
 }
 
-.share-buttons {
-  display: flex;
-  gap: 10px;
+/* Random verse highlighting */
+.random-verse p {
+  font-weight: bold;
 }
 
-.footer-note {
-  font-size: 0.8em;
-  color: #666;
-  margin-top: 20px;
-}
-
-.tips {
-  margin-top: 20px;
-  font-size: 0.9em;
-}
-
-button {
-  padding: 8px 16px;
-  background: #6ee7b7;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-}
-
-button:hover {
-  background: #5cd5a3;
-}
-
-.loading {
-  color: #999;
-  font-style: italic;
+.random-verse p span.verse-number {
+  color: #16a34a;
 }
