@@ -1,35 +1,253 @@
-:root {
-  --accent:#16a34a;
-  --bg:#0f1724;
-  --card:#0b1220;
-  --text:#e6eef8;
+/* Proverbs Daily Study - style.css */
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
 }
 
-*{box-sizing:border-box}
-html,body{margin:0;height:100%;background:linear-gradient(180deg,#071023,#0f1724);color:var(--text);font-family:system-ui,Segoe UI,Roboto,Arial}
-.app{max-width:1100px;margin:auto;padding:16px;display:grid;gap:16px}
-.top h1{margin:0;font-size:1.6rem}
-.subtitle{opacity:.8;margin:0 0 8px}
-.datetime{font-size:.9rem;opacity:.9}
-.controls{background:rgba(255,255,255,.03);padding:12px;border-radius:8px;display:grid;gap:8px}
-.control-row{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
-select,input,button{border-radius:6px;border:none;padding:6px 8px;font-size:1rem}
-select,input{background:rgba(255,255,255,.02);color:var(--text);border:1px solid rgba(255,255,255,.06)}
-button{background:var(--accent);color:#032;cursor:pointer}
-button:active{transform:translateY(1px)}
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+  background-color: #f4f4f9;
+  color: #1a202c;
+  line-height: 1.6;
+}
 
-.chapter-card{background:rgba(255,255,255,.03);padding:16px;border-radius:12px;box-shadow:0 6px 18px rgba(2,6,23,.6)}
-.chapter-header{display:flex;justify-content:space-between;align-items:center}
-.chapter-container{display:flex;gap:12px;margin-top:12px}
-.chapter-text-pane{flex:1;background:rgba(255,255,255,.02);padding:12px;border-radius:8px;overflow:auto;max-height:52vh;opacity:0;transition:opacity .4s ease-in-out}
-.chapter-text-pane.show{opacity:1}
-.chapter-text-pane p{margin:0 0 8px;line-height:1.5}
-.verse-number{color:var(--accent);font-weight:700;margin-right:6px}
-.hidden{display:none}
-.actions{display:flex;gap:8px;margin-top:12px;flex-wrap:wrap}
-.random-verse{margin-top:12px;background:rgba(255,255,255,.02);padding:10px;border-radius:8px}
-.random-verse p{font-weight:700}
-.share-buttons{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}
-.footer-note{margin-top:12px;opacity:.8}
-.tips{background:rgba(255,255,255,.02);padding:12px;border-radius:8px;opacity:.9}
-@media(max-width:900px){.chapter-container{flex-direction:column}}
+.app {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 1rem;
+}
+
+.top {
+  text-align: center;
+  margin-bottom: 1.5rem;
+}
+
+.top h1 {
+  font-size: 1.8rem;
+  color: #2d3748;
+}
+
+.subtitle {
+  font-size: 1rem;
+  color: #4a5568;
+  margin: 0.5rem 0;
+}
+
+.datetime {
+  font-size: 0.9rem;
+  color: #718096;
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+}
+
+.controls {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+  flex-wrap: wrap;
+  margin-bottom: 1.5rem;
+  padding: 0.5rem;
+  background: #edf2f7;
+  border-radius: 0.5rem;
+}
+
+.controls label {
+  font-size: 0.9rem;
+  color: #2d3748;
+}
+
+.controls input[type="date"],
+.controls select {
+  padding: 0.5rem;
+  border: 1px solid #e2e8f0;
+  border-radius: 0.25rem;
+  font-size: 0.9rem;
+}
+
+.controls button {
+  padding: 0.5rem 1rem;
+  background: #6ee7b7;
+  border: none;
+  border-radius: 0.25rem;
+  color: #1a202c;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.controls button:hover {
+  background: #5acfa0;
+}
+
+.chapter-card {
+  background: #fff;
+  border-radius: 0.5rem;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  padding: 1.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.chapter-header {
+  margin-bottom: 1rem;
+}
+
+.chapter-header h2 {
+  font-size: 1.5rem;
+  color: #2d3748;
+}
+
+.meta {
+  display: flex;
+  gap: 0.5rem;
+  font-size: 0.9rem;
+  color: #718096;
+}
+
+.dot {
+  color: #a0aec0;
+}
+
+.chapter-text {
+  max-height: 400px;
+  overflow-y: auto;
+  padding: 0.5rem;
+}
+
+.chapter-text p {
+  margin-bottom: 0.5rem;
+  font-size: 1rem;
+}
+
+.chapter-text:focus {
+  outline: 2px solid #6ee7b7;
+}
+
+.highlight {
+  background-color: #fefcbf;
+}
+
+.actions {
+  display: flex;
+  gap: 0.5rem;
+  margin: 1rem 0;
+}
+
+.actions button {
+  padding: 0.5rem 1rem;
+  background: #6ee7b7;
+  border: none;
+  border-radius: 0.25rem;
+  color: #1a202c;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.actions button:hover {
+  background: #5acfa0;
+}
+
+.random-verse {
+  background: #edf2f7;
+  padding: 1rem;
+  border-radius: 0.5rem;
+  margin-top: 1rem;
+}
+
+.random-verse.hidden {
+  display: none;
+}
+
+.random-verse h3 {
+  font-size: 1.2rem;
+  margin-bottom: 0.5rem;
+}
+
+.random-verse p {
+  font-size: 1rem;
+  margin-bottom: 0.5rem;
+}
+
+.share-buttons {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.share-buttons button,
+#closeRandom {
+  padding: 0.5rem 1rem;
+  background: #e2e8f0;
+  border: none;
+  border-radius: 0.25rem;
+  color: #1a202c;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.share-buttons button:hover,
+#closeRandom:hover {
+  background: #cbd5e0;
+}
+
+.footer-note {
+  font-size: 0.8rem;
+  color: #718096;
+  text-align: center;
+  margin-top: 1rem;
+}
+
+.tips {
+  font-size: 0.9rem;
+  color: #4a5568;
+  padding: 1rem;
+  background: #edf2f7;
+  border-radius: 0.5rem;
+}
+
+.tips h4 {
+  font-size: 1.1rem;
+  margin-bottom: 0.5rem;
+}
+
+.tips ul {
+  list-style: disc;
+  padding-left: 1.5rem;
+}
+
+@media (max-width: 600px) {
+  .app {
+    padding: 0.5rem;
+  }
+
+  .top h1 {
+    font-size: 1.5rem;
+  }
+
+  .controls {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .controls input[type="date"],
+  .controls select,
+  .controls button {
+    width: 100%;
+    margin-bottom: 0.5rem;
+  }
+
+  .actions,
+  .share-buttons {
+    flex-direction: column;
+  }
+
+  .actions button,
+  .share-buttons button,
+  #closeRandom {
+    width: 100%;
+  }
+}
