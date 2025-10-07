@@ -12,7 +12,7 @@
   <main class="app">
     <header class="top">
       <h1>Proverbs — Daily Study</h1>
-      <p class="subtitle">One chapter a day (1 → chapter 1, etc.)</p>
+      <p class="subtitle">One chapter a day (1 → chapter 1, 2 → chapter 2, …)</p>
       <div class="datetime">
         <span id="liveDate" aria-live="polite"></span>
         <span id="liveClock" aria-live="polite"></span>
@@ -20,22 +20,41 @@
     </header>
 
     <section class="controls">
-      <label for="dateOverride">Use date:</label>
-      <input id="dateOverride" type="date" />
-      <button id="applyDate">Apply</button>
-      <button id="todayBtn">Today</button>
+      <div class="control-row">
+        <label for="dateOverride">Use date:</label>
+        <input id="dateOverride" type="date" />
+        <button id="applyDate">Apply</button>
+        <button id="todayBtn">Today</button>
+      </div>
 
-      <label for="translationSelect">Translation:</label>
-      <select id="translationSelect">
-        <option value="WEB">WEB (public domain)</option>
-        <option value="KJV">KJV</option>
-        <option value="NIV">NIV</option>
-        <option value="ESV">ESV</option>
-        <option value="NLT">NLT</option>
-      </select>
+      <div class="control-row">
+        <label for="translationSelect">Primary translation:</label>
+        <select id="translationSelect">
+          <option value="WEB" selected>WEB (World English Bible)</option>
+          <option value="KJV">KJV (King James Version)</option>
+          <option value="ASV">ASV (American Standard Version)</option>
+          <option value="BBE">BBE (Bible in Basic English)</option>
+          <option value="DARBY">DARBY (Darby Translation)</option>
+          <option value="YLT">YLT (Young’s Literal Translation)</option>
+        </select>
 
-      <button id="downloadAllBtn">Download All Offline</button>
-      <button id="toggleParallelBtn">Toggle Parallel View</button>
+        <label for="parallelSelect">Parallel translation:</label>
+        <select id="parallelSelect">
+          <option value="">(none)</option>
+          <option value="WEB">WEB</option>
+          <option value="KJV">KJV</option>
+          <option value="ASV">ASV</option>
+          <option value="BBE">BBE</option>
+          <option value="DARBY">DARBY</option>
+          <option value="YLT">YLT</option>
+        </select>
+
+        <button id="toggleParallelBtn">Toggle Parallel View</button>
+      </div>
+
+      <div class="control-row">
+        <button id="downloadAllBtn">Download All Translations for Offline</button>
+      </div>
     </section>
 
     <section class="chapter-card">
@@ -48,18 +67,17 @@
         </div>
       </div>
 
-      <div class="chapter-container">
-        <!-- This container will hold one or two translation panes in parallel mode -->
-        <div id="chapterPane1" class="chapter-text-pane" tabindex="0"></div>
-        <div id="chapterPane2" class="chapter-text-pane hidden" tabindex="0"></div>
+      <div class="chapter-container" id="chapterContainer">
+        <article id="panePrimary" class="chapter-text-pane" tabindex="0"></article>
+        <article id="paneParallel" class="chapter-text-pane hidden" tabindex="0"></article>
       </div>
 
       <div class="actions">
         <button id="randomVerseBtn">Pick a random verse</button>
-        <button id="copyChapterBtn">Copy chapter (active translation)</button>
+        <button id="copyChapterBtn">Copy chapter (primary)</button>
       </div>
 
-      <div id="randomVerseArea" class="random-verse hidden" tabindex="0">
+      <div id="randomVerseArea" class="random-verse hidden" tabindex="0" aria-live="polite">
         <h3>Random verse</h3>
         <p id="randomVerseText"></p>
         <div class="share-buttons">
@@ -72,16 +90,15 @@
       </div>
 
       <footer class="footer-note">
-        <small>Translations loaded dynamically. Ensure you have rights to use them.</small>
+        <small>Public-domain translations are cached for offline use.</small>
       </footer>
     </section>
 
     <aside class="tips">
       <h4>Tips</h4>
       <ul>
-        <li>Select a translation to read that version.</li>
-        <li>“Download All Offline” caches all translations at once (after first load).</li>
-        <li>Parallel mode shows two translations side by side for comparison.</li>
+        <li>Use Parallel View to compare two translations.</li>
+        <li>“Download All” caches everything for offline reading.</li>
       </ul>
     </aside>
   </main>
