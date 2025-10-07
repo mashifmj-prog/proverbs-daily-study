@@ -12,51 +12,21 @@
   <main class="app">
     <header class="top">
       <h1>Proverbs — Daily Study</h1>
-      <p class="subtitle">One chapter a day (1 → chapter 1, 2 → chapter 2, …)</p>
+      <p class="subtitle">One chapter a day (chapter 1 on the 1st, chapter 2 on the 2nd, …)</p>
       <div class="datetime">
-        <span id="liveDate" aria-live="polite"></span>
-        <span id="liveClock" aria-live="polite"></span>
+        <span id="liveDate"></span>
+        <span id="liveClock"></span>
       </div>
     </header>
-
     <section class="controls">
-      <div class="control-row">
-        <label for="dateOverride">Use date:</label>
-        <input id="dateOverride" type="date" />
-        <button id="applyDate">Apply</button>
-        <button id="todayBtn">Today</button>
-      </div>
-
-      <div class="control-row">
-        <label for="translationSelect">Primary translation:</label>
-        <select id="translationSelect">
-          <option value="WEB" selected>WEB (World English Bible)</option>
-          <option value="KJV">KJV (King James Version)</option>
-          <option value="ASV">ASV (American Standard Version)</option>
-          <option value="BBE">BBE (Bible in Basic English)</option>
-          <option value="DARBY">DARBY (Darby Translation)</option>
-          <option value="YLT">YLT (Young’s Literal Translation)</option>
-        </select>
-
-        <label for="parallelSelect">Parallel translation:</label>
-        <select id="parallelSelect">
-          <option value="">(none)</option>
-          <option value="WEB">WEB</option>
-          <option value="KJV">KJV</option>
-          <option value="ASV">ASV</option>
-          <option value="BBE">BBE</option>
-          <option value="DARBY">DARBY</option>
-          <option value="YLT">YLT</option>
-        </select>
-
-        <button id="toggleParallelBtn">Toggle Parallel View</button>
-      </div>
-
-      <div class="control-row">
-        <button id="downloadAllBtn">Download All Translations for Offline</button>
-      </div>
+      <label for="dateOverride">Use date:</label>
+      <input id="dateOverride" type="date" />
+      <button id="todayBtn">Today</button>
+      <label for="chapterSelect">Or chapter:</label>
+      <select id="chapterSelect">
+        <option value="">Auto</option>
+      </select>
     </section>
-
     <section class="chapter-card">
       <div class="chapter-header">
         <h2 id="chapterTitle">Chapter X</h2>
@@ -66,18 +36,12 @@
           <span id="chapterDate">Date</span>
         </div>
       </div>
-
-      <div class="chapter-container" id="chapterContainer">
-        <article id="panePrimary" class="chapter-text-pane" tabindex="0"></article>
-        <article id="paneParallel" class="chapter-text-pane hidden" tabindex="0"></article>
-      </div>
-
+      <div id="chapterText" class="chapter-text" tabindex="0"></div>
       <div class="actions">
         <button id="randomVerseBtn">Pick a random verse</button>
-        <button id="copyChapterBtn">Copy chapter (primary)</button>
+        <button id="copyChapterBtn">Copy chapter text</button>
       </div>
-
-      <div id="randomVerseArea" class="random-verse hidden" tabindex="0" aria-live="polite">
+      <div id="randomVerseArea" class="random-verse hidden">
         <h3>Random verse</h3>
         <p id="randomVerseText"></p>
         <div class="share-buttons">
@@ -87,22 +51,20 @@
           <button id="shareFacebook">Facebook</button>
           <button id="copyVerseBtn">Copy verse</button>
         </div>
+        <button id="closeRandom">Close</button>
       </div>
-
       <footer class="footer-note">
-        <small>Public-domain translations are cached for offline use.</small>
+        <small>Translation: World English Bible (Public Domain). Loaded dynamically.</small>
       </footer>
     </section>
-
     <aside class="tips">
       <h4>Tips</h4>
       <ul>
-        <li>Use Parallel View to compare two translations.</li>
-        <li>“Download All” caches everything for offline reading.</li>
+        <li>The app maps day-of-month to Proverbs chapter (1 → chapter 1, … 31 → chapter 31).</li>
+        <li>Months with fewer days automatically end with the last day.</li>
       </ul>
     </aside>
   </main>
-
   <script src="script.js" defer></script>
 </body>
 </html>
