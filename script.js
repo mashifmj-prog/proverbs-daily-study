@@ -1,305 +1,298 @@
-const chapterText = document.getElementById('chapterText');
-const footerNote = document.getElementById('footerNote');
-const chapterSelect = document.getElementById('chapterSelect');
+// Proverbs Daily Study — script.js
+
+const dateElem = document.getElementById('liveDate');
+const clockElem = document.getElementById('liveClock');
+
 const translationSelect = document.getElementById('translationSelect');
-const dateOverride = document.getElementById('dateOverride');
-const todayBtn = document.getElementById('todayBtn');
-const liveDate = document.getElementById('liveDate');
-const liveClock = document.getElementById('liveClock');
-const randomVerseBtn = document.getElementById('randomVerseBtn');
-const copyChapterBtn = document.getElementById('copyChapterBtn');
-const chapterReflectionBtn = document.getElementById('chapterReflectionBtn');
-const chapterReflectionArea = document.getElementById('chapterReflectionArea');
-const reflectionText = document.getElementById('reflectionText');
-const toggleReflection = document.getElementById('toggleReflection');
+const downloadAllBtn = document.getElementById('downloadAllBtn');
+const toggleParallelBtn = document.getElementById('toggleParallelBtn');
+
+const chapterPane1 = document.getElementById('chapterPane1');
+const chapterPane2 = document.getElementById('chapterPane2');
 const randomVerseArea = document.getElementById('randomVerseArea');
 const randomVerseText = document.getElementById('randomVerseText');
-const explainVerseBtn = document.getElementById('explainVerseBtn');
-const verseExplanationArea = document.getElementById('verseExplanationArea');
-const explanationText = document.getElementById('explanationText');
-const closeRandom = document.getElementById('closeRandom');
-const shareNative = document.getElementById('shareNative');
-const shareWhatsApp = document.getElementById('shareWhatsApp');
-const shareTwitter = document.getElementById('shareTwitter');
-const shareFacebook = document.getElementById('shareFacebook');
+
+// Buttons
+const randomVerseBtn = document.getElementById('randomVerseBtn');
+const copyChapterBtn = document.getElementById('copyChapterBtn');
+const shareNativeBtn = document.getElementById('shareNative');
+const shareWhatsAppBtn = document.getElementById('shareWhatsApp');
+const shareTwitterBtn = document.getElementById('shareTwitter');
+const shareFacebookBtn = document.getElementById('shareFacebook');
 const copyVerseBtn = document.getElementById('copyVerseBtn');
 
-let currentChapter = null;
-let currentTranslation = 'kjv';
-let currentRandomVerse = null;
-let chapters = {};
-const translations = { kjv: 'King James Version (KJV)' };
+let proverbsByTranslation = {};  // { "WEB": [chapters], "KJV": ..., etc. }
+let currentTranslation = localStorage.getItem('translation') || 'WEB';
+let parallelTranslation = null;  // second translation when in parallel mode
+let useParallel = false;
 
-function setChapterSelectOptions() {
-  chapterSelect.innerHTML = '<option value="">Auto</option>';
-  for (let i = 1; i <= 31; i++) {
-    const option = document.createElement('option');
-    option.value = i;
-    option.textContent = `Chapter ${i}`;
-    chapterSelect.appendChild(option);
-  }
-}
+let currentVerse = "";  // stores the verse text (active translation version)
 
-function getEffectiveDate() {
-  return dateOverride.value ? new Date(dateOverride.value) : new Date();
-}
-
+// Live date and time
 function updateDateTime() {
   const now = new Date();
-  liveDate.textContent = now.toLocaleDateString(undefined, { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
-  liveClock.textContent = now.toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit', second: '2-digit' });
-}
-
-function getSampleChapterData(ch) {
-  if (ch === 5) {
-    return [
-      { "text": "My son, attend unto my wisdom, and bow thine ear to my understanding:", "reference": "5:1" },
-      { "text": "That thou mayest regard discretion, and that thy lips may keep knowledge.", "reference": "5:2" },
-      { "text": "For the lips of a strange woman drop as an honeycomb, and her mouth is smoother than oil:", "reference": "5:3" }
-    ];
-  }
-  return [{ "text": `Sample verse for Chapter ${ch}: Seek wisdom daily.`, "reference": `${ch}:1` }];
-}
-
-async function loadChapter(ch, trans = currentTranslation) {
-  const jsonFile = '/kjv-proverbs.json';
-  const cacheKey = `chapters_${trans}`;
-  chapterText.innerHTML = '<p class="loading">Loading chapter…</p>';
-
-  const cachedChapters = JSON.parse(localStorage.getItem(cacheKey) || '{}');
-  if (cachedChapters[ch]) {
-    chapters[`${ch}_${trans}`] = cachedChapters[ch].verses;
-    renderChapter(ch, trans);
-    return;
-  }
-
-  if (!navigator.onLine) {
-    console.warn('Offline: Using fallback sample data for Chapter ' + ch);
-    chapters[`${ch}_${trans}`] = getSampleChapterData(ch);
-    renderChapter(ch, trans);
-    chapterText.innerHTML += '<p style="color: red; font-size: 0.9em;">Offline: Showing sample data. Connect to load full chapter.</p>';
-    return;
-  }
-
-  try {
-    const res = await fetch(jsonFile);
-    if (!res.ok) throw new Error(`Failed to load ${jsonFile}: ${res.status} ${res.statusText}. Ensure file is in repo root.`);
-    const data = await res.json();
-    const chapterData = data.chapters[ch.toString()];
-    if (!chapterData || !chapterData.verses || chapterData.verses.length === 0) {
-      throw new Error(`Chapter ${ch} not found or empty in ${jsonFile}.`);
-    }
-    chapters[`${ch}_${trans}`] = chapterData.verses;
-    localStorage.setItem(cacheKey, JSON.stringify(data.chapters));
-    renderChapter(ch, trans);
-  } catch (err) {
-    console.error('Failed to load chapter:', err);
-    chapters[`${ch}_${trans}`] = getSampleChapterData(ch);
-    renderChapter(ch, trans);
-    chapterText.innerHTML += `<p style="color: red; font-size: 0.9em;">Error: ${err.message}. Using sample data. Check console (F12).</p>`;
-  }
-}
-
-function renderChapter(ch, trans) {
-  currentChapter = ch;
-  currentTranslation = trans;
-  const key = `${ch}_${trans}`;
-  const chData = chapters[key];
-  document.getElementById('chapterTitle').textContent = `Proverbs — Chapter ${ch}`;
-  document.getElementById('chapterNumber').textContent = `Chapter ${ch}`;
-  document.getElementById('chapterDate').textContent = getEffectiveDate().toLocaleDateString(undefined, { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
-  footerNote.textContent = `Translation: ${translations[trans]} (Public Domain). Loaded dynamically.`;
-  chapterText.innerHTML = '';
-  if (!chData || chData.length === 0) {
-    chapterText.innerHTML = '<p>Chapter data not available. Using sample content below.</p>';
-    chData.push({ "text": `Reflect on Chapter ${ch}: Wisdom begins with the fear of the Lord.`, "reference": `${ch}:1` });
-  }
-  chData.forEach(verse => {
-    const p = document.createElement('p');
-    p.className = 'verse';
-    p.innerHTML = `<sup>${verse.reference.split(':')[1]}</sup> ${verse.text}`;
-    chapterText.appendChild(p);
+  dateElem.textContent = now.toLocaleDateString(undefined, {
+    weekday: 'long', year: 'numeric', month: 'long', day: 'numeric'
   });
-  chapterText.focus();
+  clockElem.textContent = now.toLocaleTimeString();
+}
+setInterval(updateDateTime, 1000);
+updateDateTime();
+
+// Date / chapter logic
+function getEffectiveDate() {
+  const val = document.getElementById('dateOverride').value;
+  return val ? new Date(val + 'T00:00:00') : new Date();
 }
 
-async function fetchWithTimeout(url, options = {}, timeout = 10000) {
-  const controller = new AbortController();
-  const id = setTimeout(() => controller.abort(), timeout);
-  try {
-    const res = await fetch(url, { ...options, signal: controller.signal });
-    clearTimeout(id);
-    return res;
-  } catch (err) {
-    clearTimeout(id);
-    throw err;
+function getChapterForDate(d) {
+  const lastDay = new Date(d.getFullYear(), d.getMonth() + 1, 0).getDate();
+  const day = d.getDate();
+  return Math.min(day, lastDay);
+}
+
+// Build URL or fetch logic for translation
+function getProverbsURLFor(trans) {
+  switch (trans) {
+    case 'KJV':
+      return 'https://raw.githubusercontent.com/thiagobodruk/bible/master/json/KJV/proverbs.json';
+    case 'NIV':
+      return 'https://example.com/json/NIV/proverbs.json';  // you must host or fetch NIV
+    case 'ESV':
+      return 'https://example.com/json/ESV/proverbs.json';
+    case 'NLT':
+      return 'NLT_API';  // indicates to use API
+    case 'WEB':
+    default:
+      return 'https://raw.githubusercontent.com/thiagobodruk/bible/master/json/WEB/proverbs.json';
   }
 }
 
-async function getReflection(ch) {
-  try {
-    const res = await fetchWithTimeout('https://api.openrouter.ai/api/v1/chat/completions', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        model: 'deepseek',
-        messages: [{ role: 'user', content: `Provide a concise reflection (2-3 sentences) on Proverbs chapter ${ch} (KJV), focusing on its key themes and how they apply to daily life.` }],
-      }),
-    });
-    if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
-    const data = await res.json();
-    return data.choices[0].message.content;
-  } catch (err) {
-    console.error('Failed to fetch reflection:', err);
-    return 'Unable to load reflection. Please try again later.';
-  }
-}
+// Fetch / load for a translation (with caching)
+async function loadTranslation(trans) {
+  if (proverbsByTranslation[trans]) return;  // already loaded
 
-async function getVerseExplanation(verse) {
-  try {
-    const res = await fetchWithTimeout('https://api.openrouter.ai/api/v1/chat/completions', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        model: 'deepseek',
-        messages: [{ role: 'user', content: `Explain the meaning of Proverbs ${verse.reference} (KJV: “${verse.text}”) in 2-3 sentences, focusing on its practical application.` }],
-      }),
-    });
-    if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
-    const data = await res.json();
-    return data.choices[0].message.content;
-  } catch (err) {
-    console.error('Failed to fetch explanation:', err);
-    return 'Unable to load explanation. Please try again later.';
-  }
-}
+  const url = getProverbsURLFor(trans);
 
-function pickRandomVerse() {
-  const verses = chapters[`${currentChapter}_${currentTranslation}`];
-  if (!verses || verses.length === 0) {
-    randomVerseText.textContent = 'No verses available for this chapter.';
-    randomVerseArea.classList.remove('hidden');
+  // For versions fetched via API (e.g. NLT):
+  if (trans === 'NLT') {
+    // For NLT, fetch via API based on chapter-by-chapter calls, for example:
+    proverbsByTranslation[trans] = [null];
+    for (let ch = 1; ch <= 31; ch++) {
+      try {
+        const res = await fetch(`https://api.nlt.to/api/passages?ref=Proverbs.${ch}&key=YOUR_KEY`);
+        const htmlText = await res.text();
+        // You need to parse HTML into plain verses array
+        const verses = parseNLTfromHTML(htmlText);  
+        proverbsByTranslation[trans][ch] = verses;
+      } catch (err) {
+        console.error('NLT fetch error for chapter', ch, err);
+        proverbsByTranslation[trans][ch] = null;
+      }
+    }
     return;
   }
-  currentRandomVerse = verses[Math.floor(Math.random() * verses.length)];
-  randomVerseText.textContent = `${currentRandomVerse.reference}: ${currentRandomVerse.text}`;
+
+  // For JSON file-based translations
+  let cachedData = null;
+  if ('caches' in window) {
+    const cacheName = `proverbs-cache-${trans}`;
+    const cache = await caches.open(cacheName);
+    const match = await cache.match(url);
+    if (match) cachedData = await match.json();
+  }
+  if (cachedData) {
+    proverbsByTranslation[trans] = cachedData.chapters || cachedData;
+  }
+
+  try {
+    const res = await fetch(url);
+    const data = await res.json();
+    const chapters = data.chapters || data;  // may differ format
+    proverbsByTranslation[trans] = chapters;
+
+    if ('caches' in window) {
+      const cacheName = `proverbs-cache-${trans}`;
+      const cache = await caches.open(cacheName);
+      cache.put(url, new Response(JSON.stringify(data)));
+    }
+  } catch (err) {
+    console.error(`Failed to fetch translation ${trans}`, err);
+    if (!cachedData) {
+      // fallback UI
+      proverbsByTranslation[trans] = null;
+    }
+  }
+}
+
+// Render a chapter in a pane (pane = 1 or 2)
+function renderPane(paneElem, trans, ch) {
+  paneElem.innerHTML = '';
+  paneElem.classList.remove('show');
+
+  const chapters = proverbsByTranslation[trans];
+  if (!chapters || !chapters[ch]) {
+    paneElem.innerHTML = '<p>Error loading this translation.</p>';
+    return;
+  }
+
+  chapters[ch].forEach((v, i) => {
+    const p = document.createElement('p');
+    p.innerHTML = `<span class="verse-number">${i+1}:</span> ${v}`;
+    paneElem.appendChild(p);
+  });
+
+  // fade-in
+  requestAnimationFrame(() => paneElem.classList.add('show'));
+}
+
+// Render current chapter(s)
+async function renderChapter() {
+  const ch = getChapterForDate(getEffectiveDate());
+
+  // Ensure current translation is loaded
+  await loadTranslation(currentTranslation);
+  renderPane(chapterPane1, currentTranslation, ch);
+
+  if (useParallel && parallelTranslation) {
+    chapterPane2.classList.remove('hidden');
+    await loadTranslation(parallelTranslation);
+    renderPane(chapterPane2, parallelTranslation, ch);
+  } else {
+    chapterPane2.classList.add('hidden');
+  }
+
+  // Update header text
+  document.getElementById('chapterTitle').textContent =
+    `Proverbs — Chapter ${ch} (${currentTranslation}${useParallel && parallelTranslation ? ' vs ' + parallelTranslation : ''})`;
+  document.getElementById('chapterNumber').textContent = `Chapter ${ch}`;
+  document.getElementById('chapterDate').textContent = getEffectiveDate().toDateString();
+}
+
+// Parse NLT HTML (very simplistic, you’ll need robust HTML parse logic)
+function parseNLTfromHTML(htmlText) {
+  // Example: get verse lines with <span class="vn"> and body text <span class="body">
+  // This is just an illustrative stub:
+  const parser = new DOMParser();
+  const doc = parser.parseFromString(htmlText, 'text/html');
+  const verses = [];
+  const verseElems = doc.querySelectorAll('verse_export');
+  verseElems.forEach(ve => {
+    const vn = ve.getAttribute('vn');
+    const body = ve.querySelector('span.body');
+    const text = body ? body.textContent : '';
+    verses.push(`${vn}: ${text}`);
+  });
+  return verses;
+}
+
+// Pick random verse from active translation
+function pickRandomVerse() {
+  const ch = getChapterForDate(getEffectiveDate());
+  const chapters = proverbsByTranslation[currentTranslation];
+  if (!chapters || !chapters[ch]) return null;
+  const arr = chapters[ch];
+  const idx = Math.floor(Math.random() * arr.length);
+  return { index: idx+1, text: arr[idx] };
+}
+
+// Copy to clipboard
+async function copyToClipboard(text) {
+  try {
+    await navigator.clipboard.writeText(text);
+    alert('Copied to clipboard!');
+  } catch {
+    alert('Copy failed. Please copy manually.');
+  }
+}
+
+// Download all translations for offline
+async function downloadAllTranslations() {
+  const all = Array.from(translationSelect.options).map(o => o.value);
+  for (const trans of all) {
+    await loadTranslation(trans);
+  }
+  alert('All translations downloaded for offline.');
+}
+
+// Toggle parallel view
+function toggleParallelMode() {
+  useParallel = !useParallel;
+  if (useParallel) {
+    // pick a parallel translation different from current
+    const sel = translationSelect.value;
+    parallelTranslation = sel === 'WEB' ? 'KJV' : 'WEB';  // default fallback
+    if (parallelTranslation === currentTranslation) parallelTranslation = 'KJV';
+  } else {
+    parallelTranslation = null;
+  }
+  renderChapter();
+}
+
+// Event listeners
+translationSelect.addEventListener('change', async (e) => {
+  currentTranslation = e.target.value;
+  localStorage.setItem('translation', currentTranslation);
+  await renderChapter();
+});
+
+downloadAllBtn.addEventListener('click', downloadAllTranslations);
+
+toggleParallelBtn.addEventListener('click', toggleParallelMode);
+
+document.getElementById('applyDate').addEventListener('click', () => renderChapter());
+document.getElementById('todayBtn').addEventListener('click', () => {
+  document.getElementById('dateOverride').value = '';
+  renderChapter();
+});
+
+randomVerseBtn.addEventListener('click', () => {
+  const rv = pickRandomVerse();
+  if (!rv) return;
+  currentVerse = rv.text;
   randomVerseArea.classList.remove('hidden');
-  verseExplanationArea.classList.add('hidden');
-}
-
-function copyText(text) {
-  navigator.clipboard.writeText(text).then(() => alert('Text copied to clipboard!')).catch(err => alert('Failed to copy text: ' + err));
-}
-
-function shareVerse(platform) {
-  if (!currentRandomVerse) return;
-  const text = `Proverbs ${currentRandomVerse.reference} (${translations[currentTranslation]}): ${currentRandomVerse.text}`;
-  const url = encodeURIComponent(window.location.href);
-  const encodedText = encodeURIComponent(text);
-  let shareUrl = '';
-  switch (platform) {
-    case 'whatsapp':
-      shareUrl = `https://api.whatsapp.com/send?text=${encodedText}%20${url}`;
-      break;
-    case 'twitter':
-      shareUrl = `https://twitter.com/intent/tweet?text=${encodedText}&url=${url}`;
-      break;
-    case 'facebook':
-      shareUrl = `https://www.facebook.com/sharer/sharer.php?u=${url}&quote=${encodedText}`;
-      break;
-    case 'native':
-      if (navigator.share) {
-        navigator.share({ title: 'Proverbs — Daily Study', text, url }).catch(err => console.error('Share failed:', err));
-      } else {
-        alert('Native sharing not supported on this device.');
-      }
-      return;
-  }
-  window.open(shareUrl, '_blank');
-}
-
-setChapterSelectOptions();
-updateDateTime();
-setInterval(updateDateTime, 1000);
-
-chapterSelect.addEventListener('change', () => {
-  const ch = chapterSelect.value;
-  dateOverride.value = '';
-  if (ch) loadChapter(Number(ch));
-  else loadChapter(getEffectiveDate().getDate());
+  randomVerseText.innerHTML = `<span class="verse-number">${rv.index}:</span> ${rv.text}`;
+  randomVerseArea.focus();
 });
 
-translationSelect.addEventListener('change', () => {
-  const trans = translationSelect.value;
-  if (trans) loadChapter(currentChapter || getEffectiveDate().getDate(), trans);
+copyVerseBtn.addEventListener('click', () => {
+  if (currentVerse) copyToClipboard(currentVerse);
 });
-
-dateOverride.addEventListener('change', () => {
-  if (dateOverride.value) {
-    const date = new Date(dateOverride.value);
-    chapterSelect.value = '';
-    loadChapter(date.getDate());
-  }
-});
-
-todayBtn.addEventListener('click', () => {
-  dateOverride.value = '';
-  chapterSelect.value = '';
-  loadChapter(getEffectiveDate().getDate());
-});
-
-randomVerseBtn.addEventListener('click', pickRandomVerse);
 
 copyChapterBtn.addEventListener('click', () => {
-  const verses = chapters[`${currentChapter}_${currentTranslation}`];
-  if (!verses) return;
-  const text = verses.map(v => `${v.reference} ${v.text}`).join('\n');
-  copyText(`Proverbs ${currentChapter} (${translations[currentTranslation]})\n\n${text}`);
+  const ch = getChapterForDate(getEffectiveDate());
+  const chap = proverbsByTranslation[currentTranslation]?.[ch];
+  if (chap) copyToClipboard(chap.join('\n'));
 });
 
-chapterReflectionBtn.addEventListener('click', async () => {
-  if (chapterReflectionArea.classList.contains('hidden')) {
-    reflectionText.textContent = 'Loading reflection…';
-    chapterReflectionArea.classList.remove('hidden');
-    const reflection = await getReflection(currentChapter);
-    reflectionText.textContent = reflection;
-  } else {
-    chapterReflectionArea.classList.add('hidden');
+shareNativeBtn.addEventListener('click', async () => {
+  if (navigator.share && currentVerse) {
+    try { await navigator.share({ text: currentVerse }); }
+    catch { alert('Share cancelled or failed'); }
+  } else alert('Native share not supported');
+});
+
+shareWhatsAppBtn.addEventListener('click', () => {
+  if (!currentVerse) return;
+  window.open(`https://wa.me/?text=${encodeURIComponent(currentVerse)}`, '_blank', 'noopener,noreferrer');
+});
+
+shareTwitterBtn.addEventListener('click', () => {
+  if (!currentVerse) return;
+  window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(currentVerse)}`, '_blank', 'noopener,noreferrer');
+});
+
+shareFacebookBtn.addEventListener('click', () => {
+  if (!currentVerse) return;
+  window.open(`https://www.facebook.com/sharer/sharer.php?u=&quote=${encodeURIComponent(currentVerse)}`, '_blank', 'noopener,noreferrer');
+});
+
+// On load
+window.addEventListener('load', () => {
+  renderChapter();
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('service-worker.js')
+      .then(reg => console.log('SW registered', reg))
+      .catch(err => console.error('SW registration failed', err));
   }
 });
-
-toggleReflection.addEventListener('click', () => {
-  chapterReflectionArea.classList.toggle('hidden');
-});
-
-explainVerseBtn.addEventListener('click', async () => {
-  if (!currentRandomVerse) return;
-  explanationText.textContent = 'Loading explanation…';
-  verseExplanationArea.classList.remove('hidden');
-  const explanation = await getVerseExplanation(currentRandomVerse);
-  explanationText.textContent = explanation;
-});
-
-closeRandom.addEventListener('click', () => {
-  randomVerseArea.classList.add('hidden');
-});
-
-shareNative.addEventListener('click', () => shareVerse('native'));
-shareWhatsApp.addEventListener('click', () => shareVerse('whatsapp'));
-shareTwitter.addEventListener('click', () => shareVerse('twitter'));
-shareFacebook.addEventListener('click', () => shareVerse('facebook'));
-copyVerseBtn.addEventListener('click', () => {
-  if (currentRandomVerse) {
-    copyText(`Proverbs ${currentRandomVerse.reference} (${translations[currentTranslation]}): ${currentRandomVerse.text}`);
-  }
-});
-
-if ('serviceWorker' in navigator) {
-  navigator.serviceWorker.register('/service-worker.js').then(reg => {
-    console.log('Service Worker registered:', reg);
-  }).catch(err => {
-    console.error('Service Worker registration failed:', err);
-  });
-}
-
-loadChapter(getEffectiveDate().getDate());
